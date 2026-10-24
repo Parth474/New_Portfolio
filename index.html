@@ -1,0 +1,1568 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Parth, QA Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    /* Layout: one bright page. Pastel colour glows drift behind a faint grid.
+   Hero = headline, typed line, buttons on the left; a live test-run card on a soft tile grid on the right.
+   Then skills ticker, AI section (cards, agent loop, agent log), three test layers, role, contact. */
+    :root {
+      --bg: #F5FBF8;
+      --bg2: #E3F4EE;
+      --card: #FFFFFF;
+      --glass: rgba(255, 255, 255, 0.72);
+      --line: rgba(14, 52, 58, 0.12);
+      --fg: #0E2A30;
+      --muted: #46666D;
+      --teal: #0E9F8E;
+      --teal-d: #0A7A70;
+      --sky: #2F8CFF;
+      --sun: #FFC83D;
+      --sun-d: #8F5C00;
+      --leaf: #2FBF76;
+      --code-bg: #0D2228;
+      --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+      --font-body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-block: 0 48px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+
+    a {
+      color: inherit;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-display);
+      margin: 0;
+      line-height: 1.04;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--sky);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .label {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--teal-d);
+    }
+
+    .grad {
+      background: linear-gradient(100deg, #0B9484, #2F7FF0 75%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* background */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      will-change: transform;
+    }
+
+    .b1 {
+      width: 50vmax;
+      height: 50vmax;
+      left: -14vmax;
+      top: -16vmax;
+      background: radial-gradient(circle, rgba(14, 159, 142, 0.30), transparent 65%);
+      animation: drift1 26s ease-in-out infinite alternate;
+    }
+
+    .b2 {
+      width: 46vmax;
+      height: 46vmax;
+      right: -16vmax;
+      top: 16vh;
+      background: radial-gradient(circle, rgba(47, 140, 255, 0.24), transparent 65%);
+      animation: drift2 32s ease-in-out infinite alternate;
+    }
+
+    .b3 {
+      width: 36vmax;
+      height: 36vmax;
+      left: 20vw;
+      bottom: -16vmax;
+      background: radial-gradient(circle, rgba(255, 200, 61, 0.36), transparent 65%);
+      animation: drift3 30s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 {
+      to {
+        transform: translate(14vmax, 10vmax) scale(1.12);
+      }
+    }
+
+    @keyframes drift2 {
+      to {
+        transform: translate(-12vmax, -8vmax) scale(1.08);
+      }
+    }
+
+    @keyframes drift3 {
+      to {
+        transform: translate(10vmax, -10vmax) scale(1.2);
+      }
+    }
+
+    .grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 64px 64px;
+      opacity: 0.55;
+      -webkit-mask-image: radial-gradient(ellipse at 50% 20%, #000 10%, transparent 70%);
+      mask-image: radial-gradient(ellipse at 50% 20%, #000 10%, transparent 70%);
+    }
+
+    .glow {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 420px;
+      height: 420px;
+      margin: -210px 0 0 -210px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(14, 159, 142, 0.14), transparent 65%);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    #progress {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: env(safe-area-inset-top, 0px);
+      height: 3px;
+      z-index: 50;
+      background: linear-gradient(90deg, var(--teal), var(--sky), var(--sun));
+      transform-origin: 0 50%;
+      transform: scaleX(0);
+    }
+
+    /* nav bar */
+    .nav {
+      position: fixed;
+      z-index: 40;
+      top: calc(env(safe-area-inset-top, 0px) + 14px);
+      left: max(16px, env(safe-area-inset-left, 0px));
+      right: max(16px, env(safe-area-inset-right, 0px));
+      margin: 0 auto;
+      max-width: 1080px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 8px 8px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 28px rgba(14, 52, 58, 0.08);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14.5px;
+    }
+
+    .brand .logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      background: linear-gradient(140deg, #0A8577, #1573D6);
+      color: #fff;
+    }
+
+    .links {
+      display: flex;
+      gap: 30px;
+      font-size: 14px;
+    }
+
+    .links a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .links a:hover {
+      color: var(--fg);
+    }
+
+    /* buttons */
+    .cta {
+      margin-top: 30px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15.5px;
+      text-decoration: none;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--fg);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(14, 159, 142, 0.5);
+      box-shadow: 0 10px 28px rgba(14, 52, 58, 0.1);
+    }
+
+    .btn.primary {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(100deg, #0A8577, #1573D6);
+      box-shadow: 0 10px 30px rgba(21, 115, 214, 0.28);
+    }
+
+    .btn.primary:hover {
+      box-shadow: 0 14px 40px rgba(21, 115, 214, 0.4);
+    }
+
+    .btn.sm {
+      padding: 9px 18px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
+
+    .btn .arr {
+      transition: transform 0.2s;
+    }
+
+    .btn:hover .arr {
+      transform: translateX(4px);
+    }
+
+    /* hero */
+    .hero {
+      position: relative;
+      padding-block: 128px 40px;
+    }
+
+    #net {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 100vw;
+      height: 100%;
+      transform: translateX(-50%);
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .hero-in {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: 24px;
+      align-items: center;
+    }
+
+    .pillbadge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px;
+      border-radius: 99px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--muted);
+      box-shadow: 0 4px 14px rgba(14, 52, 58, 0.06);
+    }
+
+    .pillbadge b {
+      color: var(--leaf);
+      font-weight: 500;
+    }
+
+    .hero h1 {
+      margin-top: 22px;
+      font-size: clamp(38px, 5.6vw, 68px);
+      font-weight: 500;
+      letter-spacing: -0.035em;
+      line-height: 1.06;
+    }
+
+    .hl {
+      font-weight: 800;
+      background-size: 200% 100%;
+      animation: shimmer 7s linear infinite;
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: -200% 0;
+      }
+    }
+
+    .typed-line {
+      margin-top: 18px;
+      font-family: var(--font-mono);
+      font-size: clamp(14px, 2vw, 17px);
+      color: var(--muted);
+      min-height: 1.7em;
+    }
+
+    .typed-line #typed {
+      color: var(--teal-d);
+      font-weight: 500;
+    }
+
+    .caret {
+      display: inline-block;
+      width: 9px;
+      height: 1.05em;
+      margin-left: 3px;
+      background: var(--sun);
+      vertical-align: -3px;
+      animation: blink 1.05s steps(2) infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .lede {
+      margin-top: 12px;
+      max-width: 32em;
+      color: var(--muted);
+      font-size: 17.5px;
+    }
+
+    .lede strong {
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    /* hero visual: tiles + test-run card */
+    .stage {
+      position: relative;
+      height: clamp(380px, 44vw, 460px);
+      display: grid;
+      place-items: center;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: -8% -4%;
+      background: radial-gradient(circle at 55% 45%, rgba(14, 159, 142, 0.26), rgba(47, 140, 255, 0.12) 45%, transparent 70%);
+      filter: blur(8px);
+    }
+
+    .tiles {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      grid-auto-rows: 1fr;
+      gap: 10px;
+      -webkit-mask-image: radial-gradient(ellipse at 55% 45%, #000 15%, transparent 72%);
+      mask-image: radial-gradient(ellipse at 55% 45%, #000 15%, transparent 72%);
+    }
+
+    .tiles i {
+      border-radius: 12px;
+      border: 1px solid rgba(14, 159, 142, 0.2);
+      background: rgba(255, 255, 255, 0.45);
+      animation: tile var(--du, 5s) ease-in-out var(--dl, 0s) infinite alternate;
+    }
+
+    @keyframes tile {
+      from {
+        background-color: rgba(255, 255, 255, 0.35);
+        border-color: rgba(14, 159, 142, 0.12);
+      }
+
+      to {
+        background-color: rgba(14, 159, 142, 0.16);
+        border-color: rgba(14, 159, 142, 0.42);
+      }
+    }
+
+    .runcard {
+      position: relative;
+      z-index: 2;
+      width: min(100%, 390px);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 30px 70px rgba(14, 52, 58, 0.18);
+      overflow: hidden;
+    }
+
+    .rc-hd {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .rc-hd i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .rc-hd i:nth-child(1) {
+      background: var(--teal);
+    }
+
+    .rc-hd i:nth-child(2) {
+      background: var(--sun);
+    }
+
+    .rc-hd i:nth-child(3) {
+      background: var(--leaf);
+    }
+
+    .rc-hd span {
+      margin-left: auto;
+    }
+
+    .rc-body {
+      padding: 6px 16px 16px;
+    }
+
+    .rc-list {
+      margin: 0;
+      padding: 0;
+    }
+
+    .rc-item {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 15px;
+    }
+
+    .rc-item .st {
+      flex: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--line);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      line-height: 1;
+      color: transparent;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+
+    .rc-item.done .st {
+      background: var(--leaf);
+      border-color: var(--leaf);
+      color: #fff;
+    }
+
+    .rc-item.run .st {
+      border-color: var(--teal);
+      border-top-color: transparent;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .rc-item .tag {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--muted);
+      padding: 2px 9px;
+      border-radius: 99px;
+      background: var(--bg2);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .rc-bar {
+      height: 6px;
+      background: var(--bg2);
+      border-radius: 9px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    .rc-bar i {
+      display: block;
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--leaf));
+      transition: width 0.4s;
+    }
+
+    .rc-sum {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    #rcmsg {
+      color: var(--teal-d);
+      font-weight: 500;
+    }
+
+    .fl {
+      position: absolute;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 34px rgba(14, 52, 58, 0.14);
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    .fl i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    .fl1 {
+      left: 0;
+      top: 6%;
+      animation: bob 5s ease-in-out infinite;
+    }
+
+    .fl2 {
+      right: 0;
+      bottom: 6%;
+      animation: bob 6s ease-in-out -2s infinite;
+    }
+
+    .fl2 i {
+      background: var(--sun);
+    }
+
+    @keyframes bob {
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    /* marquee */
+    .marquee {
+      position: relative;
+      z-index: 2;
+      margin-block: 8px 24px;
+      overflow: hidden;
+      border-block: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.6);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    }
+
+    .track {
+      display: flex;
+      width: max-content;
+      animation: scroll 38s linear infinite;
+    }
+
+    .marquee:hover .track {
+      animation-play-state: paused;
+    }
+
+    .track span {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(20px, 3vw, 30px);
+      padding: 18px 26px;
+      white-space: nowrap;
+      color: var(--muted);
+      letter-spacing: -0.01em;
+    }
+
+    .track span.hot {
+      color: var(--teal-d);
+    }
+
+    .track span::after {
+      content: "✦";
+      margin-left: 52px;
+      color: var(--sun);
+      font-size: 0.7em;
+      vertical-align: 0.15em;
+    }
+
+    @keyframes scroll {
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    /* sections */
+    section {
+      position: relative;
+      padding-block: 88px 24px;
+    }
+
+    .sec-head {
+      max-width: 46em;
+    }
+
+    .sec-head h2 {
+      margin-top: 14px;
+      font-size: clamp(34px, 5.6vw, 62px);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+    }
+
+    .sec-head p {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 36em;
+    }
+
+    /* cards with spotlight */
+    .card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 2px rgba(14, 52, 58, 0.04), 0 12px 32px rgba(14, 52, 58, 0.06);
+      padding: 28px;
+      min-width: 0;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 0px), rgba(14, 159, 142, 0.13), transparent 70%);
+    }
+
+    .card:hover {
+      border-color: rgba(14, 159, 142, 0.45);
+      box-shadow: 0 1px 2px rgba(14, 52, 58, 0.04), 0 18px 44px rgba(14, 52, 58, 0.12);
+    }
+
+    .card:hover::after {
+      opacity: 1;
+    }
+
+    .card>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    .ai-grid {
+      margin-top: 44px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .card .num {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--sun-d);
+      letter-spacing: 0.08em;
+    }
+
+    .card h3 {
+      margin-top: 12px;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .card p.d {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 16.5px;
+    }
+
+    .chips {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      padding: 5px 11px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+    }
+
+    .chip.hot {
+      color: var(--sun-d);
+      border-color: rgba(255, 200, 61, 0.8);
+      background: rgba(255, 200, 61, 0.2);
+    }
+
+    .code {
+      margin-top: 20px;
+      border-radius: 12px;
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: #D5E8EA;
+    }
+
+    .code .hd {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: #8FB0B6;
+      font-size: 11.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .code .bd {
+      padding: 12px 14px;
+      overflow-x: auto;
+    }
+
+    .code pre {
+      margin: 0;
+      font: inherit;
+      white-space: pre;
+    }
+
+    .k {
+      color: #5EE0CF;
+    }
+
+    .s {
+      color: #FFD98A;
+    }
+
+    .dm {
+      color: #7FA0A6;
+    }
+
+    .ok {
+      color: #5EE28F;
+    }
+
+    .er {
+      color: #FFC24D;
+    }
+
+    .am {
+      color: #FFD98A;
+    }
+
+    /* agent loop */
+    .loop {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .loop h3 {
+      font-size: 24px;
+    }
+
+    .steps {
+      margin: 20px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .step {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--muted);
+      transition: all 0.35s;
+    }
+
+    .step .n {
+      flex: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      transition: all 0.35s;
+    }
+
+    .step b {
+      display: block;
+      font-weight: 600;
+      color: var(--fg);
+      font-size: 15.5px;
+    }
+
+    .step small {
+      font-size: 14px;
+    }
+
+    .step.done .n {
+      background: rgba(47, 191, 118, 0.16);
+      border-color: rgba(47, 191, 118, 0.55);
+      color: #17804A;
+    }
+
+    .step.on {
+      background: rgba(14, 159, 142, 0.09);
+      border-color: var(--teal);
+      transform: translateX(6px);
+      box-shadow: 0 10px 28px rgba(14, 159, 142, 0.14);
+    }
+
+    .step.on .n {
+      background: var(--teal-d);
+      color: #fff;
+      border-color: var(--teal-d);
+    }
+
+    .loopnote {
+      margin-top: 14px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .log {
+      margin-top: 20px;
+      min-height: 280px;
+    }
+
+    .log .bd {
+      padding: 16px 16px 18px;
+    }
+
+    .log .ln {
+      display: block;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      transition: opacity 0.35s, transform 0.35s;
+    }
+
+    .log .ln.hide {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    /* layers */
+    .layers {
+      margin-top: 44px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .layers .card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .layers .chips {
+      margin-top: auto;
+      padding-top: 20px;
+    }
+
+    /* role */
+    .role-card {
+      margin-top: 44px;
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 36px;
+      padding: 36px;
+    }
+
+    .role-card h3 {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-top: 0;
+    }
+
+    .role-card .meta {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .role-card ul {
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .role-card li {
+      list-style: none;
+      display: flex;
+      gap: 14px;
+      color: var(--muted);
+    }
+
+    .role-card li::before {
+      content: "";
+      flex: none;
+      width: 8px;
+      height: 8px;
+      margin-top: 10px;
+      border-radius: 2px;
+      background: var(--teal);
+      transform: rotate(45deg);
+    }
+
+    .role-card li b {
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    /* contact */
+    .contact {
+      padding-block: 120px 40px;
+    }
+
+    .contact h2 {
+      margin-top: 14px;
+      font-size: clamp(42px, 9vw, 112px);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.96;
+      max-width: 11em;
+    }
+
+    footer {
+      position: relative;
+      z-index: 2;
+      margin-top: 56px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    footer .m {
+      font-family: var(--font-mono);
+    }
+
+    /* reveal */
+    [data-reveal] {
+      transition: opacity 0.9s cubic-bezier(.2, .7, .2, 1) var(--d, 0s), transform 0.9s cubic-bezier(.2, .7, .2, 1) var(--d, 0s);
+    }
+
+    [data-reveal].pre {
+      opacity: 0.2;
+      transform: translateY(36px);
+    }
+
+    [data-reveal].pre.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (max-width: 860px) {
+      .links {
+        display: none;
+      }
+
+      .hero {
+        padding-block: 104px 24px;
+      }
+
+      .hero-in {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+      }
+
+      .stage {
+        height: 400px;
+      }
+
+      .fl1 {
+        left: 4px;
+      }
+
+      .fl2 {
+        right: 4px;
+      }
+
+      .ai-grid,
+      .loop,
+      .layers,
+      .role-card {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .role-card {
+        padding: 26px;
+        gap: 24px;
+      }
+
+      section {
+        padding-block: 64px 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .blob,
+      .track,
+      .caret,
+      .hl,
+      .tiles i,
+      .fl1,
+      .fl2 {
+        animation: none !important;
+      }
+
+      [data-reveal],
+      .step,
+      .rc-item .st,
+      .rc-bar i {
+        transition: none !important;
+      }
+
+      .marquee {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="grid"></div>
+  </div>
+  <div class="glow" id="glow" aria-hidden="true"></div>
+  <div id="progress" aria-hidden="true"></div>
+
+  <nav class="nav" aria-label="Sections">
+    <a class="brand" href="#top"><span class="logo">P</span>Parth</a>
+    <div class="links"><a href="#ai">AI</a><a href="#layers">Testing</a><a href="#role">Role</a><a
+        href="#contact">Contact</a></div>
+    <a class="btn primary sm" href="#contact">Let's Talk</a>
+  </nav>
+
+  <div class="wrap" id="top">
+    <header class="hero" id="hero">
+      <canvas id="net" aria-hidden="true"></canvas>
+      <div class="hero-in">
+        <div class="copy">
+          <span class="pillbadge"><b>●</b> Parth · QA Automation Engineer · Cyient</span>
+          <h1>Automating software quality with <span class="hl grad">AI agents</span> and <span class="hl grad">scalable
+              test suites</span></h1>
+          <p class="typed-line">building <span id="typed">AI agents for testing</span><span class="caret"></span></p>
+          <p class="lede">QA Automation Engineer specializing in <strong>Playwright with TypeScript</strong>,
+            <strong>Selenium with Java</strong>, API testing and database validation, with <strong>AI-generated
+              scripts</strong> and <strong>AI testing agents</strong> on top.</p>
+          <div class="cta">
+            <a class="btn primary" href="#ai">See my AI work <span class="arr">→</span></a>
+            <a class="btn" href="https://www.linkedin.com/in/parthsd045/" target="_blank" rel="noopener">LinkedIn <span
+                class="arr">↗</span></a>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="tiles" id="tiles" aria-hidden="true"></div>
+          <div class="runcard" aria-label="Example test run">
+            <div class="rc-hd"><i></i><i></i><i></i><span>agent run · illustrative</span></div>
+            <div class="rc-body">
+              <ul class="rc-list">
+                <li class="rc-item done"><span class="st">✓</span>Sign-in flow<span class="tag">ui</span></li>
+                <li class="rc-item done"><span class="st">✓</span>Add to cart and checkout<span class="tag">ui</span>
+                </li>
+                <li class="rc-item done"><span class="st">✓</span>Orders endpoint returns 200<span
+                    class="tag">api</span></li>
+                <li class="rc-item done"><span class="st">✓</span>Saved row matches API<span class="tag">db</span></li>
+                <li class="rc-item done"><span class="st">✓</span>Report written<span class="tag">ai</span></li>
+              </ul>
+              <div class="rc-bar"><i id="rcbar"></i></div>
+              <div class="rc-sum"><span id="rccount">5 / 5 passed</span><span id="rcmsg">All checks passed</span></div>
+            </div>
+          </div>
+          <div class="fl fl1"><i></i>AI agent writes the script</div>
+          <div class="fl fl2"><i></i>Playwright · TypeScript</div>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <div class="marquee" aria-label="Skills">
+    <div class="track">
+      <span class="hot">AI agents</span><span class="hot">AI-generated
+        scripts</span><span>Playwright</span><span>TypeScript</span><span>Selenium</span><span>Java</span><span>API
+        testing</span><span>Database validation</span><span class="hot">Copilot</span><span class="hot">Claude</span>
+      <span class="hot">AI agents</span><span class="hot">AI-generated
+        scripts</span><span>Playwright</span><span>TypeScript</span><span>Selenium</span><span>Java</span><span>API
+        testing</span><span>Database validation</span><span class="hot">Copilot</span><span class="hot">Claude</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section id="ai">
+      <div class="sec-head" data-reveal>
+        <span class="label">AI in testing</span>
+        <h2>Scripts written with AI. <span class="grad">Testing run by agents.</span></h2>
+        <p>AI is part of how I work every day. I use it to produce automation faster, and I build agents that take over
+          repetitive testing work.</p>
+      </div>
+
+      <div class="ai-grid">
+        <article class="card" data-reveal style="--d:0s">
+          <span class="num">01 · GENERATE</span>
+          <h3>AI-generated automation scripts</h3>
+          <p class="d">I use Copilot and Claude to turn requirements and test cases into Playwright and Selenium
+            scripts, then run them against the application.</p>
+          <div class="code">
+            <div class="hd"><span>Prompt → script</span><span>illustrative</span></div>
+            <div class="bd">
+              <pre><span class="dm"># prompt</span>
+<span class="am">Write a Playwright test in TypeScript: add an
+item to the cart and complete checkout.</span>
+
+<span class="dm"># generated</span>
+test(<span class="s">'checkout completes'</span>, <span class="k">async</span> ({ page }) =&gt; {
+  <span class="k">await</span> page.goto(<span class="s">'/shop'</span>);
+  <span class="k">await</span> page.getByRole(<span class="s">'button'</span>, { name: <span class="s">'Add to cart'</span> }).first().click();
+  <span class="k">await</span> page.getByRole(<span class="s">'button'</span>, { name: <span class="s">'Checkout'</span> }).click();
+  <span class="k">await</span> expect(page.getByText(<span class="s">'Order confirmed'</span>)).toBeVisible();
+});</pre>
+            </div>
+          </div>
+          <div class="chips"><span class="chip hot">Copilot</span><span class="chip hot">Claude</span><span
+              class="chip">Playwright</span><span class="chip">Selenium</span></div>
+        </article>
+
+        <article class="card" data-reveal style="--d:0.12s">
+          <span class="num">02 · DELEGATE</span>
+          <h3>AI agents for testing</h3>
+          <p class="d">I've developed AI agents for testing, so repetitive checks can be handed to an agent that reads
+            what needs testing, writes the script, runs it and reports the result.</p>
+          <div class="code">
+            <div class="hd"><span>Agent responsibilities</span><span>overview</span></div>
+            <div class="bd">
+              <pre><span class="ok">✓</span> understand the requirement
+<span class="ok">✓</span> generate the test script
+<span class="ok">✓</span> run it against the application
+<span class="ok">✓</span> investigate failures
+<span class="ok">✓</span> report what passed and what did not</pre>
+            </div>
+          </div>
+          <div class="chips"><span class="chip hot">AI agents</span><span class="chip">Test automation</span><span
+              class="chip">API testing</span></div>
+        </article>
+      </div>
+
+      <div class="loop">
+        <article class="card" data-reveal>
+          <span class="num">THE LOOP</span>
+          <h3>How a testing agent works</h3>
+          <ol class="steps" id="steps">
+            <li class="step on"><span class="n">1</span>
+              <div><b>Read</b><small>Take in the requirement or test case</small></div>
+            </li>
+            <li class="step"><span class="n">2</span>
+              <div><b>Generate</b><small>Write the automation script</small></div>
+            </li>
+            <li class="step"><span class="n">3</span>
+              <div><b>Run</b><small>Execute it in a real browser</small></div>
+            </li>
+            <li class="step"><span class="n">4</span>
+              <div><b>Fix</b><small>Investigate failures and adjust</small></div>
+            </li>
+            <li class="step"><span class="n">5</span>
+              <div><b>Report</b><small>Summarise results for the team</small></div>
+            </li>
+          </ol>
+          <p class="loopnote">↻ repeats until the suite is green</p>
+        </article>
+        <div class="code log" id="log" data-reveal style="--d:0.1s">
+          <div class="hd"><span>agent.log</span><span>illustrative run</span></div>
+          <div class="bd">
+            <span class="ln"><span class="dm">→</span> reading requirement: <span class="s">"user can apply a discount
+                code"</span></span>
+            <span class="ln"><span class="dm">→</span> generating playwright spec (typescript)</span>
+            <span class="ln"><span class="dm">→</span> running 4 tests in chromium</span>
+            <span class="ln"><span class="er">!</span> 1 needs a fix: locator <span class="s">'Apply'</span> not
+              found</span>
+            <span class="ln"><span class="dm">→</span> inspecting page, updating selector</span>
+            <span class="ln"><span class="dm">→</span> re-running</span>
+            <span class="ln"><span class="ok">✓</span> 4 passed</span>
+            <span class="ln"><span class="dm">→</span> report ready</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="layers">
+      <div class="sec-head" data-reveal>
+        <span class="label">The foundation</span>
+        <h2>Three layers under every <span class="grad">AI-built suite</span></h2>
+        <p>A user sees the screen, but a bug can start in the service or in the stored data. I check all three so a
+          failure points to where it began.</p>
+      </div>
+      <div class="layers">
+        <article class="card" data-reveal style="--d:0s">
+          <span class="num">LAYER 1</span>
+          <h3>Interface</h3>
+          <p class="d">Browser flows run end to end: forms, navigation, validation messages and the paths users take
+            most.</p>
+          <div class="chips"><span class="chip">Playwright</span><span class="chip">TypeScript</span><span
+              class="chip">Selenium</span><span class="chip">Java</span></div>
+        </article>
+        <article class="card" data-reveal style="--d:0.1s">
+          <span class="num">LAYER 2</span>
+          <h3>Service</h3>
+          <p class="d">Requests go straight to the API to check status codes, response bodies and error handling without
+            the browser in the way.</p>
+          <div class="chips"><span class="chip">API testing</span></div>
+        </article>
+        <article class="card" data-reveal style="--d:0.2s">
+          <span class="num">LAYER 3</span>
+          <h3>Data</h3>
+          <p class="d">Queries against the database confirm that what the app shows and what it stores are the same
+            thing.</p>
+          <div class="chips"><span class="chip">Database validation</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="role">
+      <div class="sec-head" data-reveal>
+        <span class="label">Role</span>
+        <h2>Where I work <span class="grad">now</span></h2>
+      </div>
+      <article class="card role-card" data-reveal>
+        <div>
+          <h3>QA Automation Engineer</h3>
+          <div class="meta"><span class="chip">Cyient</span><span class="chip">Project Cubic</span></div>
+        </div>
+        <ul>
+          <li><span><b>AI-assisted scripting.</b> Copilot and Claude help me generate automation scripts.</span></li>
+          <li><span><b>AI agents.</b> I develop agents that take on testing work.</span></li>
+          <li><span><b>UI automation.</b> Playwright with TypeScript, and Selenium with Java.</span></li>
+          <li><span><b>API and data checks.</b> API testing and database validation alongside the UI suites.</span></li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="contact" id="contact">
+      <span class="label" data-reveal>Contact</span>
+      <h2 data-reveal>Let's make testing <span class="grad">smarter.</span></h2>
+      <div class="cta" data-reveal>
+        <a class="btn primary" href="https://www.linkedin.com/in/parthsd045/" target="_blank" rel="noopener">Message me
+          on LinkedIn <span class="arr">↗</span></a>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2026 Parth</span>
+      <span class="m">linkedin.com/in/parthsd045</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+      /* scroll progress */
+      var bar = document.getElementById('progress');
+      function onScroll() {
+        var h = document.documentElement;
+        var max = h.scrollHeight - innerHeight;
+        bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, scrollY / max) : 0) + ')';
+      }
+      addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      /* glowing tile grid in the hero */
+      var tg = document.getElementById('tiles');
+      if (tg) {
+        for (var t = 0; t < 42; t++) {
+          var tile = document.createElement('i');
+          tile.style.setProperty('--dl', (Math.random() * 6).toFixed(2) + 's');
+          tile.style.setProperty('--du', (3 + Math.random() * 4).toFixed(2) + 's');
+          tg.appendChild(tile);
+        }
+      }
+
+      /* reveal on scroll: only blocks below the first screen start dimmed */
+      var items = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
+      if ('IntersectionObserver' in window && !reduce) {
+        var io = new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.12 });
+        items.forEach(function (el) {
+          if (el.getBoundingClientRect().top > innerHeight * 0.9) { el.classList.add('pre'); io.observe(el); }
+        });
+      }
+
+      /* card spotlight */
+      Array.prototype.forEach.call(document.querySelectorAll('.card'), function (el) {
+        el.addEventListener('pointermove', function (e) {
+          var r = el.getBoundingClientRect();
+          el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+          el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+      });
+
+      /* cursor glow */
+      var glow = document.getElementById('glow');
+      if (fine && !reduce) {
+        var gx = innerWidth / 2, gy = innerHeight / 3, tx = gx, ty = gy;
+        addEventListener('pointermove', function (e) { tx = e.clientX; ty = e.clientY; glow.style.opacity = 1; });
+        (function follow() {
+          gx += (tx - gx) * 0.12; gy += (ty - gy) * 0.12;
+          glow.style.transform = 'translate(' + gx + 'px,' + gy + 'px)';
+          requestAnimationFrame(follow);
+        })();
+      }
+
+      /* typed phrases */
+      var phrases = ['AI agents for testing', 'automation scripts with AI', 'Playwright suites in TypeScript', 'Selenium frameworks in Java', 'API and database checks'];
+      var typed = document.getElementById('typed');
+      if (!reduce) {
+        var pi = 0, pj = phrases[0].length, del = true;
+        (function tick() {
+          var p = phrases[pi], t;
+          pj += del ? -1 : 1;
+          typed.textContent = p.slice(0, pj);
+          t = del ? 32 : 65;
+          if (!del && pj === p.length) { del = true; t = 1700; }
+          else if (del && pj === 0) { del = false; pi = (pi + 1) % phrases.length; t = 320; }
+          setTimeout(tick, t);
+        })();
+      }
+
+      /* test-run card: starts all green, then replays the run in a loop */
+      var rc = Array.prototype.slice.call(document.querySelectorAll('.rc-item'));
+      var rcbar = document.getElementById('rcbar');
+      var rcmsg = document.getElementById('rcmsg');
+      var rccount = document.getElementById('rccount');
+      function setRc(n) {
+        rc.forEach(function (it, k) {
+          it.classList.toggle('done', k < n);
+          it.classList.toggle('run', k === n && n < rc.length);
+        });
+        rcbar.style.width = (n / rc.length * 100) + '%';
+        rccount.textContent = n + ' / ' + rc.length + ' passed';
+        rcmsg.textContent = n === rc.length ? 'All checks passed' : 'Running…';
+      }
+      if (!reduce) {
+        var rn = rc.length;
+        function step() {
+          if (rn >= rc.length) { rn = 0; setRc(0); setTimeout(step, 900); }
+          else { rn++; setRc(rn); setTimeout(step, rn === rc.length ? 3600 : 900); }
+        }
+        /* the page opens fully green; the first replay starts after a pause */
+        setTimeout(step, 3200);
+      }
+
+      /* node network in the hero */
+      var cv = document.getElementById('net');
+      var ctx = cv.getContext('2d');
+      var hero = document.getElementById('hero');
+      var W = 0, H = 0, nodes = [], mouse = { x: -999, y: -999 }, visible = true;
+      function size() {
+        var r = hero.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = innerWidth; H = r.height;
+        cv.width = W * dpr; cv.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        var n = Math.round(Math.min(64, W * H / 15000));
+        nodes = [];
+        for (var i = 0; i < n; i++) nodes.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35, r: Math.random() * 1.5 + 0.9 });
+      }
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        var i, j, a, b, d, dx, dy;
+        for (i = 0; i < nodes.length; i++) {
+          a = nodes[i];
+          if (!reduce) {
+            a.x += a.vx; a.y += a.vy;
+            if (a.x < 0 || a.x > W) a.vx *= -1;
+            if (a.y < 0 || a.y > H) a.vy *= -1;
+            dx = a.x - mouse.x; dy = a.y - mouse.y; d = Math.hypot(dx, dy);
+            if (d < 130 && d > 0) { a.x += dx / d * 0.7; a.y += dy / d * 0.7; }
+          }
+          for (j = i + 1; j < nodes.length; j++) {
+            b = nodes[j]; d = Math.hypot(a.x - b.x, a.y - b.y);
+            if (d < 125) { ctx.strokeStyle = 'rgba(14,159,142,' + (0.3 * (1 - d / 125)) + ')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+          }
+          d = Math.hypot(a.x - mouse.x, a.y - mouse.y);
+          if (d < 170) { ctx.strokeStyle = 'rgba(47,140,255,' + (0.55 * (1 - d / 170)) + ')'; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke(); }
+          ctx.fillStyle = 'rgba(14,159,142,0.55)'; ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, 6.2832); ctx.fill();
+        }
+      }
+      function loop() { if (visible && !reduce) draw(); requestAnimationFrame(loop); }
+      size(); draw();
+      addEventListener('resize', function () { size(); draw(); });
+      addEventListener('pointermove', function (e) { var r = hero.getBoundingClientRect(); mouse.x = e.clientX; mouse.y = e.clientY - r.top; });
+      if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }).observe(hero);
+      if (!reduce) loop();
+
+      /* agent loop steps */
+      var steps = Array.prototype.slice.call(document.querySelectorAll('#steps .step'));
+      if (!reduce) {
+        var si = 0;
+        setInterval(function () {
+          si = (si + 1) % (steps.length + 1);
+          steps.forEach(function (s, k) {
+            s.classList.toggle('on', k === si);
+            s.classList.toggle('done', k < si);
+          });
+        }, 1500);
+      }
+
+      /* agent log: types in once when scrolled into view */
+      var lines = Array.prototype.slice.call(document.querySelectorAll('#log .ln'));
+      if ('IntersectionObserver' in window && !reduce) {
+        var logIo = new IntersectionObserver(function (es) {
+          if (!es[0].isIntersecting) return;
+          logIo.disconnect();
+          lines.forEach(function (l) { l.classList.add('hide'); });
+          lines.forEach(function (l, k) { setTimeout(function () { l.classList.remove('hide'); }, 450 + k * 700); });
+        }, { threshold: 0.35 });
+        logIo.observe(document.getElementById('log'));
+      }
+    })();
+  </script>
+</body>
+</html>
